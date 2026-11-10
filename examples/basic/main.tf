@@ -21,8 +21,19 @@ module "scheduler" {
 
 # A resource opts in with one tag.
 resource "aws_instance" "example" {
+  # checkov:skip=CKV2_AWS_41: demo instance needs no AWS API access, so no instance profile
   ami           = data.aws_ami.al2023.id
   instance_type = "t3.micro"
+  ebs_optimized = true
+  monitoring    = true
+
+  metadata_options {
+    http_tokens = "required" # IMDSv2 only
+  }
+
+  root_block_device {
+    encrypted = true
+  }
 
   tags = {
     Name     = "scheduler-demo"
