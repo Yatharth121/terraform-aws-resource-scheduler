@@ -1,0 +1,15 @@
+# Checks skipped on purpose, with the reason. Everything else must pass.
+skip-check:
+  - CKV_AWS_117  # Lambda in a VPC: it only calls AWS APIs, a VPC adds NAT cost for nothing
+  - CKV_AWS_116  # Lambda DLQ: EventBridge Scheduler retries the invocation; failures are in logs
+  - CKV_AWS_173  # Env var KMS encryption: variables hold tag names and flags, no secrets
+  - CKV_AWS_272  # Code signing: out of scope for a module consumers package themselves
+  - CKV_AWS_50   # X-Ray tracing: optional, two short API loops per run
+  - CKV_AWS_115  # Reserved concurrency: runs twice a day from a schedule
+  - CKV_AWS_158  # Log group KMS: logs hold resource IDs only
+  - CKV_AWS_338  # One-year log retention: retention is a variable, default 30 days
+  - CKV_AWS_356  # "*" resources: only on Describe/List calls, which don't support resource scoping
+  - CKV_AWS_111  # Write without constraints: every write action is tag-conditioned
+directory:
+  - .
+quiet: true
