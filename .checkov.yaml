@@ -10,6 +10,7 @@ skip-check:
   - CKV_AWS_338  # One-year log retention: retention is a variable, default 30 days
   - CKV_AWS_356  # "*" resources: only on Describe/List calls, which don't support resource scoping
   - CKV_AWS_111  # Write without constraints: every write action is tag-conditioned
+  - CKV_AWS_297  # Scheduler CMK: the schedule payload is {"action": "start"}, nothing sensitive
 directory:
   - .
 quiet: true
