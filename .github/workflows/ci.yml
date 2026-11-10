@@ -1,6 +1,64 @@
-on: workflow_dispatch
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
 jobs:
-  noop:
+  terraform:
     runs-on: ubuntu-latest
     steps:
-      - run: true
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Format
+        run: terraform fmt -check -recursive
+
+      - name: Init
+        run: terraform init -backend=false
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Validate example
+        working-directory: examples/basic
+        run: terraform init -backend=false && terraform validate
+
+      - name: Test (mocked providers, no AWS account needed)
+        run: terraform test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: terraform-linters/setup-tflint@v4
+      - run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: tflint --recursive --format compact
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bridgecrewio/checkov-action@v12
+        with:
+          config_file: .checkov.yaml
+          framework: terraform
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest ruff
+      - run: ruff check src tests
+      - run: pytest -q tests
